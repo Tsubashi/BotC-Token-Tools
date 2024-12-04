@@ -40,9 +40,10 @@ def _parse_args():
     parser.add_argument('--reminder-diameter', type=int, default=reminder_diameter_default,
                         help="The diameter (in pixels) to use for reminder tokens. Components will be resized to fit. "
                              f"(Default: {reminder_diameter_default})")
+    parser.add_argument('--skip-ability-text', action='store_true',
+                        help="Don't include ability text on the role tokens.")
     args = parser.parse_args(sys.argv[2:])
     return args
-
 
 def run():
     """Use JSON to create a set of tokens."""
@@ -89,8 +90,8 @@ def run():
             reminder_icon = icon.clone()
             # The "^" modifier means this transform specifies the minimum height and width.
             # A transform without a modifier specifies the maximum height and width.
-            target_width = components.reminder_bg.width * 0.75
-            target_height = components.reminder_bg.height * 0.75
+            target_width = components.reminder_bg.width * 0.7
+            target_height = components.reminder_bg.height * 0.7
             reminder_icon.transform(resize=f"{target_width}x{target_height}^")
             reminder_icon.transform(resize=f"{target_width}x{target_height}")
             for reminder_text in role.reminders:
@@ -112,7 +113,7 @@ def run():
             step_progress.update(step_task, description=f"Creating Token for: {role.name}")
             token_icon = icon.clone()
 
-            token = create_role_token(token_icon, role, components, args.role_diameter)
+            token = create_role_token(token_icon, role, components, args.role_diameter, args.skip_ability_text)
             # Save the token
             token.save(filename=token_output_path)
             token.close()
@@ -149,7 +150,9 @@ def find_roles_from_json(json_files):
             with open(json_file, "r") as f:
                 data = json.load(f)
             # Rewrite the icon path to be relative to our working directory
-            data['icon'] = str(json_file.parent / data.get('icon'))
+            icon = data.get('icon')
+            if icon:
+                data['icon'] = str(json_file.parent / str(data.get('icon')))
             role = Role(data.get('name', "Unknown"))
             for att in dir(role):
                 if att in data:

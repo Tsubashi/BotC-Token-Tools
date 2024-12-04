@@ -89,7 +89,7 @@ def fit_ability_text(text, font_size, first_line_width, step, components):
     return img
 
 
-def curved_text_to_image(text, token_type, token_diameter, components):
+def curved_text_to_image(text, token_type, token_diameter, components, use_large_fonts=False):
     """Change a text string into an image with curved text.
 
     Args:
@@ -97,6 +97,7 @@ def curved_text_to_image(text, token_type, token_diameter, components):
         token_type (str): The type of text to be displayed. Either "reminder" or "role".
         token_diameter (int): The width of the token. This is used to determine the amount of curvature.
         components (TokenComponents): The component package to load fonts from.
+        use_large_fonts (bool): Whether to use larger fonts for the text.
     """
     # Make sure we have text to draw. Otherwise, just return an empty image.
     img = Image(width=1, height=1, resolution=(600, 600))
@@ -104,9 +105,9 @@ def curved_text_to_image(text, token_type, token_diameter, components):
         return img
 
     # Set up the font and color based on the token type
-    token_diameter = int(token_diameter - (token_diameter * 0.1))  # Reduce the diameter by 10% to give a little padding
+    token_diameter = int(token_diameter - (token_diameter * 0.05))  # Reduce the diameter to add padding
     if token_type == "reminder":
-        font_size = token_diameter * 0.15
+        font_size = token_diameter * 0.2
         font_filepath = str(components.ReminderTextFont)
         color = "#ECEAED"
     else:
@@ -115,6 +116,9 @@ def curved_text_to_image(text, token_type, token_diameter, components):
         color = "#000000"
         text = text.upper()
 
+    # Adjust the font size if needed
+    if use_large_fonts:
+        font_size = font_size * 2
     # Create the image
     with Drawing() as draw:
         # Assign font details
@@ -127,7 +131,7 @@ def curved_text_to_image(text, token_type, token_diameter, components):
         while True:
             metrics = draw.get_font_metrics(img, text)
             height, width = int(metrics.text_height), int(metrics.text_width)
-            if width > 2 * token_diameter * 0.8:
+            if width > 2 * token_diameter * 0.5:
                 draw.font_size = draw.font_size * 0.9
             else:
                 break
