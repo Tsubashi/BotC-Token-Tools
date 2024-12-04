@@ -81,6 +81,10 @@ def run():
                 continue
 
             # Create the reminder tokens
+            icon_path = Path(str(role.icon))
+            if not icon_path.exists():
+                print(f"[red]Error:[/][bold] Icon not found for role: {role.name}[/]")
+                continue
             icon = Image(filename=role.icon)
             reminder_icon = icon.clone()
             # The "^" modifier means this transform specifies the minimum height and width.
