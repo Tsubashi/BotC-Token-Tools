@@ -45,6 +45,7 @@ def _parse_args():
     args = parser.parse_args(sys.argv[2:])
     return args
 
+
 def run():
     """Use JSON to create a set of tokens."""
     args = _parse_args()

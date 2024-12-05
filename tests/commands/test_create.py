@@ -205,6 +205,7 @@ def test_decoding_errors(input_path, capsys):
     output = capsys.readouterr()
     assert "Unknown error loading JSON file:" in output.out
 
+
 def test_missing_icon(input_path, capsys):
     """Alert the user if a role is missing an icon."""
     output_path = input_path.parent / "output"

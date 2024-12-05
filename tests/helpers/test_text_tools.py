@@ -47,6 +47,7 @@ def test_multiline_brackets(tmp_path):
     img = text_tools.fit_ability_text(text, 12, 100, 10, TokenComponents())
     assert img.height == 48  # Only check height on this one because GHA rounds differently than local.
 
+
 def test_large_font():
     """Test that large fonts are used when requested."""
     text = "This is a long string that should be curved."
