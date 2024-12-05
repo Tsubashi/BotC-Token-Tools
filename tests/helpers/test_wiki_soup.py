@@ -185,5 +185,5 @@ def test_spirit_of_ivory():
         wiki_soup = WikiSoup()
         wiki_soup.load_from_web()
         with pytest.raises(RuntimeError) as e:
-            wiki_soup._get_wiki_soup("Spirit Of Ivory")
-        assert "Could not find role Spirit_of_Ivory" in str(e.value)
+            wiki_soup._get_wiki_soup("Spirit of Ivory")
+        assert "Could not find role Spirit_Of_Ivory" in str(e.value)

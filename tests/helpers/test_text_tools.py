@@ -31,7 +31,7 @@ def test_long_curved_text():
     """Test that a long string gets curved."""
     text = "This is a long string that should be curved."
     img = text_tools.curved_text_to_image(text, "role", 100, TokenComponents())
-    assert img.size == (72, 57)
+    assert img.size == (68, 36)
 
 
 def test_inline_brackets():
@@ -46,3 +46,12 @@ def test_multiline_brackets(tmp_path):
     text = "A [test of setup effects that most certainly cause wrapping before the bracket ends]"
     img = text_tools.fit_ability_text(text, 12, 100, 10, TokenComponents())
     assert img.height == 48  # Only check height on this one because GHA rounds differently than local.
+
+
+def test_large_font():
+    """Test that large fonts are used when requested."""
+    text = "This is a long string that should be curved."
+    img = text_tools.curved_text_to_image(
+        text, "role", 100, TokenComponents(), use_large_fonts=True
+    )
+    assert img.size == (68, 37)

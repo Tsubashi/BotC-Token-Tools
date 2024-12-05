@@ -35,7 +35,12 @@ def create_reminder_token(reminder_icon, reminder_text, components, diameter):
     return reminder
 
 
-def create_role_token(token_icon: Image, role: Role, components: TokenComponents, diameter: int):
+def create_role_token(
+        token_icon: Image,
+        role: Role,
+        components: TokenComponents,
+        diameter: int,
+        skip_ability_text: bool):
     """Create and save a role token.
 
     Args:
@@ -43,12 +48,16 @@ def create_role_token(token_icon: Image, role: Role, components: TokenComponents
         role (dict): The role data to use for the token.
         components (TokenComponents): The component package to use.
         diameter (int): The diameter (in pixels) to use for role tokens.
+        skip_ability_text (bool): Whether to include the ability text on the role tokens.
     """
     # Adjust icon size
     # The "^" modifier means this transform specifies the minimum height and width.
     # A transform without a modifier specifies the maximum height and width.
-    target_width = components.role_bg.width * 0.6
-    target_height = components.role_bg.height * 0.5
+    target_width = components.role_bg.width * 0.7
+    if skip_ability_text:
+        target_height = components.role_bg.height * 0.7
+    else:
+        target_height = components.role_bg.height * 0.5
     token_icon.transform(resize=f"{target_width}x{target_height}^")
     token_icon.transform(resize=f"{target_width}x{target_height}")
 
@@ -57,9 +66,14 @@ def create_role_token(token_icon: Image, role: Role, components: TokenComponents
     for leaf in components.leaves[:len(role.reminders)]:
         token.composite(leaf, left=0, top=0)
 
-    # Determine where to place the icon
+    # Determine where to place the icon.
+    # If we have ability text then move the icon down a bit to make room.
+    height_adjustment = int(token.height * 0.075)
+    if skip_ability_text:
+        # If we don't have ability text, move the icon up a bit to use the free space.
+        height_adjustment = int(token.height * -0.05)
     icon_x = (token.width - token_icon.width) // 2
-    icon_y = (token.height - token_icon.height + int(token.height * 0.15)) // 2
+    icon_y = ((token.height - token_icon.height) // 2) + height_adjustment
     token.composite(token_icon, left=icon_x, top=icon_y)
     token_icon.close()
     # Check for modifiers
@@ -70,20 +84,21 @@ def create_role_token(token_icon: Image, role: Role, components: TokenComponents
     if role.affects_setup:
         token.composite(components.setup_flower, left=0, top=0)
     # Add ability text to the token
-    ability_text_img = fit_ability_text(
-        text=role.ability,
-        font_size=int(token.height * 0.055),
-        first_line_width=int(token.width * .52),
-        step=int(token.width * .1),
-        components=components
-    )
-    ability_text_x = (token.width - ability_text_img.width) // 2
-    token.composite(ability_text_img, left=ability_text_x, top=int(token.height * 0.09))
-    ability_text_img.close()
+    if not skip_ability_text:
+        ability_text_img = fit_ability_text(
+            text=role.ability,
+            font_size=int(token.height * 0.055),
+            first_line_width=int(token.width * .52),
+            step=int(token.width * .1),
+            components=components
+        )
+        ability_text_x = (token.width - ability_text_img.width) // 2
+        token.composite(ability_text_img, left=ability_text_x, top=int(token.height * 0.09))
+        ability_text_img.close()
     # Add the role name to the token
-    text_img = curved_text_to_image(role.name, "role", token.width, components)
+    text_img = curved_text_to_image(role.name, "role", token.width, components, skip_ability_text)
     text_x = (token.width - text_img.width) // 2
-    text_y = (token.height - text_img.height - int(token.height * 0.08))
+    text_y = (token.height - text_img.height - int(token.height * 0.06))
     token.composite(text_img, left=text_x, top=text_y)
     text_img.close()
 
