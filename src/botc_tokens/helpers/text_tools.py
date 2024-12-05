@@ -119,6 +119,7 @@ def curved_text_to_image(text, token_type, token_diameter, components, use_large
     # Adjust the font size if needed
     if use_large_fonts:
         font_size = font_size * 2
+
     # Create the image
     with Drawing() as draw:
         # Assign font details
@@ -131,7 +132,7 @@ def curved_text_to_image(text, token_type, token_diameter, components, use_large
         while True:
             metrics = draw.get_font_metrics(img, text)
             height, width = int(metrics.text_height), int(metrics.text_width)
-            if width > 2 * token_diameter * 0.5:
+            if width > token_diameter * 1.1:  # Don't allow the text to curl up too high
                 draw.font_size = draw.font_size * 0.9
             else:
                 break
