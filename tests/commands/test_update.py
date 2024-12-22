@@ -8,6 +8,7 @@ from unittest import mock
 from urllib.error import HTTPError
 
 # Third Party
+import pytest
 from testhelpers import check_output_folder, expected_role_json, webmock_list
 
 # Application Specific
@@ -252,7 +253,7 @@ def test_invalid_reminder_file(tmp_path, capsys):
     assert "does not match the schema:" in output.out
 
 
-def test_custom_list(tmp_path):
+def test_custom_list(tmp_path, capsys):
     """Test using a custom list instead of the wiki."""
     custom_list = tmp_path / "custom.json"
     with open(custom_list, "w") as f:
@@ -265,6 +266,7 @@ def test_custom_list(tmp_path):
                 "team": "townsfolk",
                 "ability": "First Ability",
                 "edition": "99 - Testing",
+                "reminders": ["First Reminder"],
                 "firstNight": 1,
                 "otherNight": 0,
             },
@@ -275,9 +277,23 @@ def test_custom_list(tmp_path):
                 "team": "townsfolk",
                 "ability": "Second Ability",
                 "edition": "99 - Testing",
+                "remindersGlobal": ["SECOND REMINDER"],
                 "firstNight": 0,
                 "otherNight": 5,
             },
+            {
+                "id": "Third",
+                "name": "Third",
+                "image": ["Third.png", "Third_evil.png"],
+                "team": "townsfolk",
+                "ability": "Second Ability",
+                "edition": "99 - Testing",
+                "reminders": ["Third reminder"],
+                "remindersGlobal": ["Fourth reminder"],
+                "firstNight": 0,
+                "otherNight": 5,
+            },
+            {"id": "bootlegger"},
         ], f)
     output_path = tmp_path / "roles"
     with mock.patch("sys.argv",
@@ -288,12 +304,18 @@ def test_custom_list(tmp_path):
 
     # Verify that it worked
     expected_files = [
-        str(Path("Unknown") / "townsfolk" / "First.json"),
-        str(Path("Unknown") / "townsfolk" / "First.png"),
-        str(Path("Unknown") / "townsfolk" / "Second.json"),
-        str(Path("Unknown") / "townsfolk" / "Second.png"),
+        str(Path("99 - Testing") / "townsfolk" / "First.json"),
+        str(Path("99 - Testing") / "townsfolk" / "First.png"),
+        str(Path("99 - Testing") / "townsfolk" / "Second.json"),
+        str(Path("99 - Testing") / "townsfolk" / "Second.png"),
+        str(Path("99 - Testing") / "townsfolk" / "Third.json"),
+        str(Path("99 - Testing") / "townsfolk" / "Third.png"),
     ]
     check_output_folder(output_path, expected_files=expected_files)
+
+    # Verify the bootlegger skippage was show to the user
+    output = capsys.readouterr()
+    assert "because it has no name" in output.out
 
 
 def test_nonexistent_custom_list(tmp_path, capsys):
@@ -318,9 +340,10 @@ def test_bad_format_custom_list(tmp_path, capsys):
                     ["botc_tokens", "update", "--output", str(output_path), "--custom-list", str(custom_list)]
                     ):
         with web_mock():
-            update.run()
+            with pytest.raises(AttributeError):
+                update.run()
     output = capsys.readouterr()
-    assert "Could not parse" in output.out
+    assert "be warned that it might not work" in output.out
 
 
 def test_forced_setup(tmp_path, capsys):

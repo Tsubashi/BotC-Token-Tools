@@ -78,13 +78,19 @@ def run():
             if role.get("id") == "_meta":  # Skip the metadata
                 overall_progress.update(role_task, advance=1)
                 continue
+            if not role.get("name"):
+                print(f"[red]Error:[/] Skipping id: '{role['id']}' because it has no name.")
+                overall_progress.update(role_task, advance=1)
+                continue
             step_progress.update(step_task, description=f"Found role: {role['name']}")
             # Determine this role's team, preferring the roleType field
             team = role.get("roleType")
             team = role.get("team") if team is None else team
             team = "Unknown" if team is None else team
 
-            version = role.get("version", "Unknown")
+            version = role.get("version")
+            version = role.get("edition") if version is None else version
+            version = "Unknown" if version is None else version
 
             role_output_path = output_path / version / team
             role_output_path.mkdir(parents=True, exist_ok=True)
@@ -126,8 +132,9 @@ def prep_wiki(script_filter, custom_list=None):
             try:
                 validate(custom_list, json.load(open(data_dir / "role_schema.json")))
             except ValidationError as e:
-                print(f"[red]Error:[/] Could not parse '{custom_list}' as it does not match the schema: {e}")
-                return None
+                print(f"[yellow]Warning:[/] The custom json specified does not fit the copy of the TPI schema that I "
+                      f"have. Specifically: {e}"
+                      f"\n\nI will continue, but [yellow]be warned that it might not work[/].")
             wiki.role_data = custom_list
     else:
         # Download the official lists from the script tool
@@ -164,7 +171,13 @@ def process_role(role, file, wiki, step_progress, step_task, role_output_path):
         found_role.ability = role.get("ability") if role.get("ability") else get_role_ability(name, wiki)
 
         step_progress.update(step_task, description=f"Getting reminders for {name}")
-        found_role.reminders = role.get("reminders") if role.get("reminders") else get_role_reminders(name, wiki)
+        found_role.reminders = []
+        if role.get("reminders"):
+            found_role.reminders.extend(role.get("reminders"))
+        if role.get("remindersGlobal"):
+            found_role.reminders.extend(role.get("remindersGlobal"))
+        if not found_role.reminders:
+            found_role.reminders = get_role_reminders(name, wiki)
 
         # Determine night actions
         if role.get("firstNight"):
