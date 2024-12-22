@@ -15,7 +15,7 @@
           "team",
           "ability"
         ],
-        "additionalProperties": false,
+        "additionalProperties": true,
         "properties": {
           "id": {
             "type": "string",
