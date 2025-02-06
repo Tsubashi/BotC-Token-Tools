@@ -61,6 +61,7 @@ def test_update_command(tmp_path):
         str(Path("54 - Unreal Experimental") / "townsfolk" / "First.png"),
         str(Path("54 - Unreal Experimental") / "demon" / "Second.json"),
         str(Path("54 - Unreal Experimental") / "demon" / "Second.png"),
+        str(Path("99 - Ignored") / "outsider" / "Third.json"),
     ]
     check_output_folder(output_path, expected_files=expected_files, check_func=check_expected_json)
 
@@ -83,6 +84,7 @@ def test_update_existing_folder(tmp_path):
         str(Path("54 - Unreal Experimental") / "townsfolk" / "First.png"),
         str(Path("54 - Unreal Experimental") / "demon" / "Second.json"),
         str(Path("54 - Unreal Experimental") / "demon" / "Second.png"),
+        str(Path("99 - Ignored") / "outsider" / "Third.json"),
     ]
     check_output_folder(output_path, expected_files=expected_files, check_func=check_expected_json)
 
@@ -104,6 +106,7 @@ def test_update_bad_json(tmp_path, capsys):
         str(Path("54 - Unreal Experimental") / "townsfolk" / "First.json"),
         str(Path("54 - Unreal Experimental") / "demon" / "Second.json"),
         str(Path("54 - Unreal Experimental") / "demon" / "Second.png"),
+        str(Path("99 - Ignored") / "outsider" / "Third.png"),
     ]
     check_output_folder(output_path, expected_files=expected_files)
 
@@ -164,6 +167,7 @@ def test_update_icon_already_exists(tmp_path):
         str(Path("54 - Unreal Experimental") / "townsfolk" / "First.png"),
         str(Path("54 - Unreal Experimental") / "demon" / "Second.json"),
         str(Path("54 - Unreal Experimental") / "demon" / "Second.png"),
+        str(Path("99 - Ignored") / "outsider" / "Third.json"),
     ]
     check_output_folder(output_path, expected_files=expected_files)
 
@@ -186,6 +190,7 @@ def test_update_custom_reminders_file(tmp_path):
         str(Path("54 - Unreal Experimental") / "townsfolk" / "First.png"),
         str(Path("54 - Unreal Experimental") / "demon" / "Second.json"),
         str(Path("54 - Unreal Experimental") / "demon" / "Second.png"),
+        str(Path("99 - Ignored") / "outsider" / "Third.json"),
     ]
     check_output_folder(output_path, expected_files=expected_files)
     with open(output_path / "54 - Unreal Experimental" / "townsfolk" / "First.json", "r") as f:
@@ -217,6 +222,7 @@ def test_update_existing_icon_and_json(tmp_path):
         str(Path("54 - Unreal Experimental") / "townsfolk" / "First.png"),
         str(Path("54 - Unreal Experimental") / "demon" / "Second.json"),
         str(Path("54 - Unreal Experimental") / "demon" / "Second.png"),
+        str(Path("99 - Ignored") / "outsider" / "Third.json"),
     ]
     check_output_folder(output_path, expected_files=expected_files)
 

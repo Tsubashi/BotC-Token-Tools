@@ -31,8 +31,8 @@ def _parse_args():
     parser = argparse.ArgumentParser(description='Download roles from the wiki, with associated icon and description.')
     parser.add_argument('-o', '--output-dir', type=str, default='inputs',
                         help="Directory in which to write the json and icon files (Default: 'inputs')")
-    parser.add_argument('--script-filter', type=str, default='Experimental',
-                        help="Filter for scripts to pull (Default: 'Experimental')")
+    parser.add_argument('--script-filter', type=str, default='',
+                        help="Filter for scripts to pull (Example: 'Experimental')")
     parser.add_argument('--reminders', type=str,
                         help="JSON file to override reminder guesses from the wiki.")
     parser.add_argument('-c', '--custom-list', type=str, default=None,

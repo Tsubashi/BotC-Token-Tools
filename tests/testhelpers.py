@@ -144,5 +144,16 @@ expected_role_json = {
         'other_nights': True,
         'reminders': ["SECOND REMINDER"],
         'type': 'demon'
+    },
+    "Third.json": {
+        "name": "Third",
+        "ability": "",
+        "type": "outsider",
+        "icon": None,
+        "first_night": False,
+        "other_nights": False,
+        "reminders": [],
+        "affects_setup": True,
+        "home_script": "99 - Ignored"
     }
 }
