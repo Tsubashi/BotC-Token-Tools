@@ -29,6 +29,7 @@ class Printable:
         self.page_height = page_height
         self.page = None
         self.document = Image()
+        self.document.resolution = (300, 300)
         self.current_x = 0
         self.current_y = 0
         self.next_row_should_be_inset = False
@@ -48,7 +49,7 @@ class Printable:
             self.current_x, self.current_y = 0, 0
             self.page_number += 1
             self.next_row_should_be_inset = False
-        self.page = Image(width=self.page_width, height=self.page_height, resolution=(300, 300))
+        self.page = Image(width=self.page_width, height=self.page_height)
 
     def write(self):
         """Write everything to disk."""
