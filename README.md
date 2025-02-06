@@ -16,10 +16,14 @@ or manually by cloning this repository and running the following command in the 
 pip install .
 ```
 
-We use [Wand](https://docs.wand-py.org/en/0.6.13/) to handle image manipulation, which requires the 
-[ImageMagick](https://imagemagick.org/index.php) library to be installed on your system. Check the 
-[wand install guide](https://docs.wand-py.org/en/0.6.13/guide/install.html) for details on how to get
-that set up.
+We use [Wand](https://docs.wand-py.org/en/0.6.13/) to handle image manipulation, which requires the [ImageMagick](https://imagemagick.org/index.php) library to be installed on your 
+system. Check the [wand install guide](https://docs.wand-py.org/en/0.6.13/guide/install.html) for details on how to get that set up.
+
+**Note for Apple Silicon:** When running on Apple Silicon, Wand will not auto-detect the ImageMagick installation. 
+You will need to set the `MAGICK_HOME` environment variable to your homebrew root, like so:
+```bash
+export MAGICK_HOME=/opt/homebrew/
+```
 
 ## Usage
 **For a full walkthrough and for more component packages, see the 
