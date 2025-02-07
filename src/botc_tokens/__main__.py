@@ -5,7 +5,7 @@ import sys
 from rich import print
 
 from .__version__ import version
-from .commands import create, dump_components, group, update
+from .commands import create, dump_components, group, update, trim_icons
 
 
 def _print_version():
@@ -19,6 +19,7 @@ allowed_commands = {
     "create": (create.run, "Create token images to match json files in a directory tree."),
     "dump-components": (dump_components.run, "Write all the default components to the specified directory."),
     "group": (group.run, "Create printable sheets of roles and reminder from a json script file."),
+    "trim-icons": (trim_icons.run, "Find all icons in a folder and trim away extra space."),
     "update": (update.run, "Download roles from the wiki, with associated icon and description."),
     "version": (_print_version, "Print version and exit."),
 }
