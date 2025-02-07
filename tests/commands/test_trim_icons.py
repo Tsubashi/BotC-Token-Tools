@@ -1,15 +1,15 @@
 """Trim it all!"""
 # Standard Library
-from unittest.mock import patch
 from shutil import copy
+from unittest.mock import patch
 
 # Third Party
 import pytest
+from testhelpers import check_output_folder
 from wand.image import Image
 
 # Application Specific
 from botc_tokens.commands import trim_icons
-from testhelpers import check_output_folder
 
 
 @pytest.fixture()

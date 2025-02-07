@@ -5,7 +5,7 @@ import sys
 from rich import print
 
 from .__version__ import version
-from .commands import create, dump_components, group, update, trim_icons
+from .commands import create, dump_components, group, trim_icons, update
 
 
 def _print_version():

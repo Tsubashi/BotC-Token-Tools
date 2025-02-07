@@ -1,4 +1,4 @@
-"""Trim Icons"""
+"""Trim Icons."""
 # Standard Library
 import argparse
 from pathlib import Path
@@ -13,6 +13,7 @@ from wand.image import Image
 # Application Specific
 from ..helpers.progress_group import setup_progress_group
 
+
 def _parse_args():
     parser = argparse.ArgumentParser(
         prog="botc_tokens trim-icons",
@@ -20,11 +21,12 @@ def _parse_args():
     )
     parser.add_argument('target_directory', type=str,
                         help='The directory containing the icons.')
-    parser.add_argument("-i","--in-place", action="store_true", default=False,
+    parser.add_argument("-i", "--in-place", action="store_true", default=False,
                         help="Overwrite the original files.")
 
     args = parser.parse_args(sys.argv[2:])
     return args
+
 
 def run():
     """Find all icons in a folder and trim away extra space."""

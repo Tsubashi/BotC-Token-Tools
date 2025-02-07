@@ -4,11 +4,10 @@ from contextlib import contextmanager
 from io import StringIO
 import json
 from pathlib import Path
-from unittest import mock
+from unittest.mock import MagicMock, patch
 from urllib.error import HTTPError
 
 # Third Party
-import pytest
 from testhelpers import check_output_folder, expected_role_json, webmock_list
 
 # Application Specific
@@ -20,22 +19,31 @@ from botc_tokens.helpers.role import Role
 def web_mock():
     """Mock out actual web access."""
     # First create the return data we would expect from the web, in the order we expect it.
-    wiki_read_mock = mock.MagicMock()
+    wiki_read_mock = MagicMock()
     wiki_read_mock.read.side_effect = webmock_list
-    image_read_mock = mock.MagicMock()
+    image_read_mock = MagicMock()
     image_read_mock.read.return_value = (Path(__file__).parent.parent / "data" / "icons" / "1.png").read_bytes()
 
     # Now mock out all the web calls to instead return the data we created
-    with mock.patch("botc_tokens.helpers.wiki_soup.urlopen") as wiki_soup_urlopen_mock:
+    with patch("botc_tokens.helpers.wiki_soup.urlopen") as wiki_soup_urlopen_mock:
         wiki_soup_urlopen_mock.return_value.__enter__.return_value.read = wiki_read_mock
         wiki_soup_urlopen_mock.return_value = wiki_read_mock
         # Make sure to patch it in the update command as well, since we don't want to actually download the images
-        with mock.patch("botc_tokens.commands.update.urlopen") as update_urlopen_mock:
+        with patch("botc_tokens.commands.update.urlopen") as update_urlopen_mock:
             update_urlopen_mock.return_value.__enter__.return_value.read = image_read_mock
             update_urlopen_mock.return_value = image_read_mock
             fake_image = Path(__file__).parent.parent / "data" / "icons" / "1.png"
             update_urlopen_mock.read.return_value = fake_image.read_bytes()
             yield
+
+
+def _run_cmd(arg_list):
+    argv_patch = ["botc_tokens", "update"]
+    argv_patch.extend(arg_list)
+
+    with patch("sys.argv", argv_patch):
+        with web_mock():
+            update.run()
 
 
 def check_expected_json(input_file_path):
@@ -51,9 +59,7 @@ def check_expected_json(input_file_path):
 def test_update_command(tmp_path):
     """Test the update command in its normal configuration."""
     output_path = tmp_path / "roles"
-    with mock.patch("sys.argv", ["botc_tokens", "update", "--output", str(output_path)]):
-        with web_mock():
-            update.run()
+    _run_cmd(["--output", str(output_path)])
 
     # Verify that it worked
     expected_files = [
@@ -74,9 +80,8 @@ def test_update_existing_folder(tmp_path):
     first_file.parent.mkdir(parents=True, exist_ok=True)
     with open(first_file, "w") as f:
         json.dump(expected_role_json.get("First.json"), f)
-    with mock.patch("sys.argv", ["botc_tokens", "update", "--output", str(output_path)]):
-        with web_mock():
-            update.run()
+
+    _run_cmd(["--output", str(output_path)])
 
     # Verify that it worked
     expected_files = [
@@ -97,9 +102,7 @@ def test_update_bad_json(tmp_path, capsys):
     first_file.parent.mkdir(parents=True, exist_ok=True)
     with open(first_file, "w") as f:
         f.write("This is not json")
-    with mock.patch("sys.argv", ["botc_tokens", "update", "--output", str(output_path)]):
-        with web_mock():
-            update.run()
+    _run_cmd(["--output", str(output_path)])
 
     # Verify that we got the files we expected
     expected_files = [
@@ -123,11 +126,7 @@ def test_update_bad_json(tmp_path, capsys):
 def test_update_script_filter(tmp_path):
     """Test the script filter option."""
     output_path = tmp_path / "roles"
-    with mock.patch("sys.argv",
-                    ["botc_tokens", "update", "--output", str(output_path), "--script-filter", "99 - Ignored"]
-                    ):
-        with web_mock():
-            update.run()
+    _run_cmd(["--output", str(output_path), "--script-filter", "99 - Ignored"])
 
     # Verify that it worked
     expected_files = [
@@ -140,9 +139,7 @@ def test_update_script_filter(tmp_path):
 def test_update_missing(tmp_path, capsys):
     """Test when the wiki doesn't return the expected data."""
     output_path = tmp_path / "roles"
-    with mock.patch("sys.argv", ["botc_tokens", "update", "--output", str(output_path), "--script-filter", ""]):
-        with web_mock():
-            update.run()
+    _run_cmd(["--output", str(output_path), "--script-filter", ""])
 
     # Check if we alerted to user to not being able to find the role info
     output = capsys.readouterr()
@@ -158,9 +155,7 @@ def test_update_icon_already_exists(tmp_path):
     icon_path = output_path / "54 - Unreal Experimental" / "townsfolk" / "First.png"
     icon_path.parent.mkdir(parents=True, exist_ok=True)
     icon_path.touch()
-    with mock.patch("sys.argv", ["botc_tokens", "update", "--output", str(output_path)]):
-        with web_mock():
-            update.run()
+    _run_cmd(["--output", str(output_path)])
 
     # Verify that it worked
     expected_files = [
@@ -179,11 +174,7 @@ def test_update_custom_reminders_file(tmp_path):
     with open(reminders_file, "w") as f:
         json.dump({"First": ["Custom reminder"]}, f)
     output_path = tmp_path / "roles"
-    with mock.patch("sys.argv",
-                    ["botc_tokens", "update", "--output", str(output_path), "--reminders", str(reminders_file)]
-                    ):
-        with web_mock():
-            update.run()
+    _run_cmd(["--output", str(output_path), "--reminders", str(reminders_file)])
 
     # Verify that it worked
     expected_files = [
@@ -213,9 +204,7 @@ def test_update_existing_icon_and_json(tmp_path):
     json_path.parent.mkdir(parents=True, exist_ok=True)
     with open(json_path, "w") as f:
         json.dump(expected_role_json.get("First.json"), f)
-    with mock.patch("sys.argv", ["botc_tokens", "update", "--output", str(output_path)]):
-        with web_mock():
-            update.run()
+    _run_cmd(["--output", str(output_path)])
 
     # Verify that it worked
     expected_files = [
@@ -232,11 +221,11 @@ def test_update_existing_icon_and_json(tmp_path):
 def test_web_error_getting_icon(tmp_path, capsys):
     """Alert the user if we fail to get the icon."""
     output_path = tmp_path / "roles"
-    wiki = mock.MagicMock()
+    wiki = MagicMock()
     wiki.get_big_icon_url.return_value = "First.png"
     found_role = Role(name="First")
-    with mock.patch("botc_tokens.commands.update.urlopen") as urlopen_mock:
-        image_read_mock = mock.MagicMock()
+    with patch("botc_tokens.commands.update.urlopen") as urlopen_mock:
+        image_read_mock = MagicMock()
         fp = StringIO()  # This is necessary to avoid an issue when deconstructing urllib.error.HTTPError
         image_read_mock.read.side_effect = HTTPError("First.png", 404, "Failed to get icon", "hdrs", fp)
         urlopen_mock.return_value.__enter__.return_value.read = image_read_mock
@@ -252,13 +241,30 @@ def test_invalid_reminder_file(tmp_path, capsys):
     with open(reminders_file, "w") as f:
         f.write('{"Librarian": 2}')
     output_path = tmp_path / "roles"
-    with mock.patch("sys.argv",
-                    ["botc_tokens", "update", "--output", str(output_path), "--reminders", str(reminders_file)]
-                    ):
-        with web_mock():
-            update.run()
+
+    _run_cmd(["--output", str(output_path), "--reminders", str(reminders_file)])
+
     output = capsys.readouterr()
     assert "does not match the schema:" in output.out
+
+
+def test_bloodstar_with_official(tmp_path, capsys):
+    """Test a bloodstar json that uses multiple official roles."""
+    custom_list = tmp_path / "custom.json"
+    with open(custom_list, "w") as f:
+        json.dump([
+            "imp",
+            "librarian",
+            "virgin",
+        ], f)
+
+    output_path = tmp_path / "roles"
+    _run_cmd(["--output", str(output_path), "--custom-list", str(custom_list)])
+
+    check_output_folder(output_path, expected_files=[])
+
+    output = capsys.readouterr()
+    assert "does not have any data. Checking the official wiki" in output.out
 
 
 def test_custom_list(tmp_path, capsys):
@@ -304,11 +310,7 @@ def test_custom_list(tmp_path, capsys):
             {"id": "bootlegger"},
         ], f)
     output_path = tmp_path / "roles"
-    with mock.patch("sys.argv",
-                    ["botc_tokens", "update", "--output", str(output_path), "--custom-list", str(custom_list)]
-                    ):
-        with web_mock():
-            update.run()
+    _run_cmd(["--output", str(output_path), "--custom-list", str(custom_list)])
 
     # Verify that it worked
     expected_files = [
@@ -329,11 +331,7 @@ def test_custom_list(tmp_path, capsys):
 def test_nonexistent_custom_list(tmp_path, capsys):
     """Alert the user if the input doesn't exist."""
     output_path = tmp_path / "roles"
-    with mock.patch("sys.argv",
-                    ["botc_tokens", "update", "--output", str(output_path), "--custom-list", str(tmp_path / "nope")]
-                    ):
-        with web_mock():
-            update.run()
+    _run_cmd(["--output", str(output_path), "--custom-list", str(tmp_path / "nope")])
     output = capsys.readouterr()
     assert "Could not find" in output.out
 
@@ -344,11 +342,7 @@ def test_bad_format_custom_list(tmp_path, capsys):
     with open(custom_list, "w") as f:
         f.write('{"Librarian": 2}')
     output_path = tmp_path / "roles"
-    with mock.patch("sys.argv",
-                    ["botc_tokens", "update", "--output", str(output_path), "--custom-list", str(custom_list)]
-                    ):
-        with web_mock():
-            update.run()
+    _run_cmd(["--output", str(output_path), "--custom-list", str(custom_list)])
     output = capsys.readouterr()
     assert "be warned that it might not work" in output.out
 
@@ -356,12 +350,7 @@ def test_bad_format_custom_list(tmp_path, capsys):
 def test_forced_setup(tmp_path, capsys):
     """Roles are modified to affect setup if the show up in the force list."""
     output_path = tmp_path / "roles"
-    with mock.patch(
-            "sys.argv",
-            ["botc_tokens", "update", "--output", str(output_path), "--script-filter", "99 - Ignored"]
-    ):
-        with web_mock():
-            update.run()
+    _run_cmd(["--output", str(output_path), "--script-filter", "99 - Ignored"])
 
     # Verify that it worked
     with open(output_path / "99 - Ignored" / "outsider" / "Third.json", "r") as f:
