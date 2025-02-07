@@ -73,8 +73,28 @@ def run():
             forced_setup = json.load(f)
 
         # Step through each role and grab the relevant data before adding it to the list.
+        official_wiki = None
         overall_progress.update(role_task, total=len(wiki.role_data))
         for role in wiki.role_data:
+            # Bloodstar uses bare strings for built-in roles. If we see one, we need to pull data from official wiki and
+            # see if we can find a match.
+            if isinstance(role, str):
+                # Remove underscores for better matching
+                rolename = role.replace("_", "")
+                print(f"[yellow]Warning:[/] Role '{rolename}' does not have any data. Checking the official wiki.")
+                if official_wiki is None:
+                    official_wiki = WikiSoup("")
+                    official_wiki.load_from_web()
+                # Match on either ID or Name
+                try:
+                    role = next(
+                        role for role in official_wiki.role_data
+                        if role.get("name") == rolename or role.get("id") == rolename
+                    )
+                except StopIteration:
+                    print(f"[red]Error:[/] Unable to find '{rolename}' in official wiki. Skipping.")
+                    overall_progress.update(role_task, advance=1)
+                    continue
             if role.get("id") == "_meta":  # Skip the metadata
                 overall_progress.update(role_task, advance=1)
                 continue

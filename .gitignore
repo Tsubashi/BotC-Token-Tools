@@ -1,11 +1,9 @@
 ## Project Specific ##
 __version__.py
 inputs
-!example/inputs/
 tokens
-!example/tokens/
 printables
-!example/printables/
+bugs
 
 ## MacOS ##
 # General
