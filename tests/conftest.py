@@ -21,7 +21,6 @@ def test_data_dir():
 @pytest.fixture()
 def component_package(tmp_path):
     """Create a token component package."""
-    """Test that the token components are dumped as expected."""
     # Create the token components
     token_components = TokenComponents()
 

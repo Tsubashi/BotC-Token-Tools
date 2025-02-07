@@ -69,7 +69,7 @@ def test_paper_sizes(example_script, token_dir, tmp_path):
         "--paper-height", "512"
     ])
 
-    with Image(filename=(output_path / "roles.pdf")) as img:
+    with Image(filename=(output_path / "roles.pdf"), resolution=(300,300)) as img:
         assert img.size == (256, 512)
 
 

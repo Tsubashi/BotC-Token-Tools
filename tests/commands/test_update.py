@@ -106,6 +106,7 @@ def test_update_bad_json(tmp_path, capsys):
         str(Path("54 - Unreal Experimental") / "townsfolk" / "First.json"),
         str(Path("54 - Unreal Experimental") / "demon" / "Second.json"),
         str(Path("54 - Unreal Experimental") / "demon" / "Second.png"),
+        str(Path("99 - Ignored") / "outsider" / "Third.json"),
         str(Path("99 - Ignored") / "outsider" / "Third.png"),
     ]
     check_output_folder(output_path, expected_files=expected_files)
@@ -223,6 +224,7 @@ def test_update_existing_icon_and_json(tmp_path):
         str(Path("54 - Unreal Experimental") / "demon" / "Second.json"),
         str(Path("54 - Unreal Experimental") / "demon" / "Second.png"),
         str(Path("99 - Ignored") / "outsider" / "Third.json"),
+        str(Path("99 - Ignored") / "outsider" / "Third.png"),
     ]
     check_output_folder(output_path, expected_files=expected_files)
 
@@ -346,8 +348,7 @@ def test_bad_format_custom_list(tmp_path, capsys):
                     ["botc_tokens", "update", "--output", str(output_path), "--custom-list", str(custom_list)]
                     ):
         with web_mock():
-            with pytest.raises(AttributeError):
-                update.run()
+            update.run()
     output = capsys.readouterr()
     assert "be warned that it might not work" in output.out
 

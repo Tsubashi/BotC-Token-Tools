@@ -48,8 +48,17 @@ def run():
 
         for icon_file in icon_files:
             with Image(filename=icon_file) as img:
+                # Save the original size so we can check if anything changed
+                original_size = img.size
+
                 # Remove the extra space around the icon
                 img.trim(color=Color('rgba(0,0,0,0)'), fuzz=0)
+
+                # Check to see if anything changed, no need to save if nothing changed
+                if img.size == original_size:
+                    overall_progress.update(task, increment=1)
+                    continue
+
                 if args.in_place:
                     img.save(filename=str(icon_file))
                 else:
